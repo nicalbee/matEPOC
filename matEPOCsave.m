@@ -1,3 +1,7 @@
+
+% edits:
+%   27-Apr-2016: added load printout to command window
+
 function matEPOCsave(in_data,varargin)
 
 inputs.varargin = varargin;
@@ -89,6 +93,7 @@ if strcmp(sav.tmp.confirm_choice,'Yes')
             save(sav.fullfile,'matEPOC');
             fprintf('Done\n\tData written to ''%s'' file (EEGLAB):\n\t- file = %s\n\t- dir = %s\n',...
                 sav.tmp.type,sav.file_name,sav.tmp.dir);
+             fprintf('Import note:\n\tLoad with:\n\tload(''%s'')\n\n',sav.fullfile);
         case {'csv','txt'}
             fprintf('\t... this can take a little while...\n\n');
             if strcmp(sav.tmp.type,'csv')
@@ -114,6 +119,7 @@ if strcmp(sav.tmp.confirm_choice,'Yes')
             dlmwrite(sav.fullfile,matEPOC,'delimiter',sav.tmp.delim,'-append');
             fprintf('Done\n\tData written to ''%s'' file:\n\t- file = %s\n\tdir = %s\n',...
                 sav.tmp.type,sav.file_name,sav.tmp.dir);
+            
         otherwise
             if ~isnumeric(sav.tmp.type)
                 sav.tmp.err = sprintf('Inputted type variable (%s), not recognised',sav.tmp.type);

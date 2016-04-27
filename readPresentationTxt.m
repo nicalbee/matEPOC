@@ -24,7 +24,7 @@ if exist(pres_file,'file')
         pres = importdata(pres_file,'\t',1);
     end
     
-    if istable(pres)
+    if exist('istable','file') && istable(pres)
         var4 = find(ismember(pres.Properties.VariableNames,'Var4'));
         tmp_names = pres.Properties.VariableNames;
         if ~isempty(var4)
@@ -51,8 +51,79 @@ if exist(pres_file,'file')
     else
         % NAB 4-Apr-2016 for original/2012 Emotiv vs Neuroscan data files -
         % table read isn't working for some reason...
-        out.condition = pres.textdata(2:end,3);
-        out.times = pres.data(1:end,1);
+        pres.headers =  [];
+        for i = 1 : size(pres.textdata,2);
+            pres.headers{i} = pres.textdata{1,i};
+        end
+        
+%          pres.condition_column = 0;
+%        
+%         if ~iscell(condition_header) 
+%             tmp_cond{1} = condition_header;
+%         else % && numel(condition_header) > 1 
+%             tmp_cond = condition_header;
+%         end
+%         for i = 1 : numel(tmp_cond)
+%             for j = 1 : numel(pres.headers)
+%             if strcmp(tmp_cond{i},pres.headers{j})
+%                 pres.condition_column = j;
+%                 break
+%             end
+%             end
+%         end
+%         
+%         if pres.condition_column
+%             out.condition = pres.textdata(2:end,pres.condition_column);
+%             if isempty(out.condition{2})
+%                 % find where the text data becomes empty
+%                 tmp_empty = 0;
+%                 for i = 1 : numel(pres.headers)
+%                     if isempty(pres.textdata{2,i})
+%                         tmp_empty = i;
+%                         break
+%                     end
+%                 end
+%                 pres.cond_data_column = 1 + tmp_empty - pres.condition_column;
+%                 out.condition = pres.data(1:end,pres.cond_data_column);
+%             end
+%         end
+        tmp_search = {'condition','time'};
+        for k = 1 : numel(tmp_search);
+        tmp_column = 0;
+       eval(sprintf('tmp_headers = %s_header;',tmp_search{k}));
+        if ~iscell(condition_header) 
+            tmp_find{1} = tmp_headers;
+        else % && numel(tmp_headers) > 1 
+            tmp_find = tmp_headers;
+        end
+        for i = 1 : numel(tmp_find)
+            for j = 1 : numel(pres.headers)
+            if strcmp(tmp_find{i},pres.headers{j})
+                tmp_column = j;
+                break
+            end
+            end
+        end
+        
+        if tmp_column
+            out.(tmp_search{k}) = pres.textdata(2:end,tmp_column);
+            if isempty(out.(tmp_search{k}){2})
+                % find where the text data becomes empty
+                tmp_empty = 0;
+                for i = 1 : numel(pres.headers)
+                    if isempty(pres.textdata{2,i})
+                        tmp_empty = i;
+                        break
+                    end
+                end
+                tmp_data_column = 1 + tmp_column - tmp_empty;
+                out.(tmp_search{k}) = pres.data(1:end,tmp_data_column);
+            end
+        end
+        end
+%         out.times = pres.data(1:end,1);
+out.times = out.time;
+        
     end
     if isempty(out.condition) || isempty(out.times)
         out.warn = 'Problem finding condition or time column in condition file';

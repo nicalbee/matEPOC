@@ -12,6 +12,7 @@ try
         'sort_by','alphabet',... 'number_events',...
         'file_name',[],...
         'times',[], ...
+        'time_units','ms',... 'sec'
         'ylim',[-20 200],...
         'Hertz',128 ...
         );
@@ -111,7 +112,12 @@ try
             mep.tmp.first_marker_sample = find(mep.tmp.markers,1,'first');
             mep.tmp.first_marker_sec = mep.tmp.first_marker_sample*mep.tmp.sample_duration;
             
-            mep.tmp.times_adjust = mep.tmp.first_marker_sec + (mep.tmp.times - mep.tmp.times(1))/1000;
+            mep.tmp.times_adjust = mep.tmp.first_marker_sec + (mep.tmp.times - mep.tmp.times(1));
+            switch mep.tmp.time_units
+                case {'ms','msec'}
+                    mep.tmp.times_adjust = mep.tmp.times_adjust/1000;
+%             mep.tmp.times_adjust = mep.tmp.first_marker_sec + (mep.tmp.times - mep.tmp.times(1))/1000;
+            end
             mep.tmp.times_samples = round(mep.tmp.times_adjust/mep.tmp.sample_duration);
             sampleSummary(mep.tmp.times_samples*(1/mep.tmp.Hertz),'Condition Times')
             mep.tmp.data(mep.tmp.times_samples,ismember(mep.tmp.data_labels,'conditions')) = 10;
