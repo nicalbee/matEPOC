@@ -16,6 +16,10 @@ end
 
 
 out = [];
+if exist('pres_file','var') || isempty(pres_file)
+    [file_name_only,file_dir] = uigetfile('*.*');
+    pres_file = fullfile(file_dir,file_name_only);
+end
 if exist(pres_file,'file')
     fprintf('Reading %s:\n',pres_file);
     try

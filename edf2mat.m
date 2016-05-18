@@ -25,6 +25,7 @@
 % author: Nic Badcock using some of Johnson Thie's code
 %
 % updates:
+% 18-May-2016: NAB auto get file if there isn't an input
 
 function data = edf2mat(file_name,data_Hertz)
 
@@ -32,13 +33,19 @@ data.matrix = [];
 data.channel_labels = [];
 data.table = [];
 
+
 if ~exist('file_name','var') || isempty(file_name)
-    msg = sprintf('''file_name'' input variable doesn''t exist or is empty. Aborting %s.',mfilename);
-    warndlg(msg,sprintf('%s function error',mfilename));
-    return
+    [file_name_only,file_dir] = uigetfile('*.edf');
+    file_name = fullfile(file_dir,file_name_only);
+    %     if ~exist(file_name,'file')
+    %         msg = sprintf('''file_name'' input variable doesn''t exist or is empty. Aborting %s.',mfilename);
+    %         warndlg(msg,sprintf('%s function error',mfilename));
+    %         return
+    %     end
 end
 
-if ~exist(file_name,'file')
+
+if isempty(file_name) || ~exist(file_name,'file')
     msg = sprintf('File (%s) not found. Check path or use full path to file. Aborting %s.',mfilename);
     warndlg(msg,sprintf('%s function error',mfilename));
     return
