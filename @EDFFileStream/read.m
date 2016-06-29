@@ -33,9 +33,14 @@ end
 digimin = fileStream.digimin';
 physmin = fileStream.physmin';
 scale = ((fileStream.physmax-fileStream.physmin) ./ (fileStream.digimax-fileStream.digimin))';
+try
 data = (data - digimin(ones(size(data,1),1),:)) .* scale(ones(size(data,1),1),:) ...
     + physmin(ones(size(data,1),1),:);
-
+catch err
+    fprintf(['Error in reading (%s) data might ',...
+        'not have recorded properly. Aborting.\n'],err.message);
+    data = [];
+end
 % Update the sample index
 fileStream.sample_index = fileStream.sample_index + fileStream.nDataRead;
 
