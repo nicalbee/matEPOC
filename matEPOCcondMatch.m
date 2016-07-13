@@ -25,7 +25,7 @@ try
         fprintf('''markers'' variable is empty - can''t work without this');
         return
     elseif isempty(mep.tmp.times) && isempty(mep.tmp.conditions)
-        fprintf('''conditions'' and/or ''times'' variable/s empty - can''t work without these');
+        fprintf('''conditions'' and/or ''times'' variable/s empty - can''t work without these\n');
         return
     end
     
