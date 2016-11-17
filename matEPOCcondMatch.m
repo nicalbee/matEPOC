@@ -115,7 +115,7 @@ try
             mep.tmp.times_adjust = mep.tmp.first_marker_sec + (mep.tmp.times - mep.tmp.times(1));
             switch mep.tmp.time_units
                 case {'ms','msec'}
-                    mep.tmp.times_adjust = mep.tmp.times_adjust/1000;
+                    mep.tmp.times_adjust = mep.tmp.first_marker_sec + mep.tmp.times_adjust/1000;
 %             mep.tmp.times_adjust = mep.tmp.first_marker_sec + (mep.tmp.times - mep.tmp.times(1))/1000;
             end
             mep.tmp.times_samples = round(mep.tmp.times_adjust/mep.tmp.sample_duration);

@@ -17,7 +17,7 @@ mep = edf2mat(in.fullfile,in.Hertz);
 
 mep.event_channels = {'O1','O2'};
 
-mep = matEPOCevents(mep,'event_channels',mep.event_channels,...%'plot',...
+mep = matEPOCevents(mep,'event_channels',mep.event_channels,'plot',...
     'pulse_length',[160 300],'pulse_separation',1000);
 
 %% line the event markers up with behavioural conditions
@@ -28,7 +28,7 @@ in.pres_fullfile = fullfile(in.pres_dir,in.pres_file_name);
 
 % import the timing information of the events recorded by the behavioural
 % presentation
-pres = readPresentationTxt(in.pres_fullfile);
+pres = readPresentationTxt(in.pres_fullfile,'Var3','Var5');
 % note: could also use:
 % condition_header = 'Code';
 % time_header = 'Time';

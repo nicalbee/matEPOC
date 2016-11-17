@@ -16,7 +16,7 @@ end
 
 
 out = [];
-if exist('pres_file','var') || isempty(pres_file)
+if ~exist('pres_file','var') || isempty(pres_file)
     [file_name_only,file_dir] = uigetfile('*.*');
     pres_file = fullfile(file_dir,file_name_only);
 end
