@@ -9,6 +9,8 @@ in.Hertz = 128;
 
 mep = edf2mat(in.fullfile,in.Hertz);
 
+mep = matEPOCsampleRate(mep);
+
 % returns a structured variable with:
 % mep.matrix = data matrix
 % mep.channel_labels = column lables for matrix
