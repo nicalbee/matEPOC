@@ -12,7 +12,7 @@ if isstruct(mep) && isfield(mep,'table') && istable(mep.table)
     %     tmp.data(tmp.data == max(tmp.data)) = [];
     %     tmp.values = unique(tmp.data);
     %     tmp.Hertz2 = numel(tmp.data) / numel(tmp.values);
-    %     mep.Hertz_theoretical = mep.Hertz;
+        mep.Hertz_theoretical = mep.Hertz;
     %     mep.Hertz_actual = tmp.Hertz2;
     %     mep.Hertz = tmp.Hertz2;
     
