@@ -1,7 +1,11 @@
 function matEPOCplot(in_data,varargin)
 
+% updates:
+% 14-Mar-2017 NAB updated to accept 'mep' structure, defaulting to show
+% just the 14 EEG channels
+
 inputs.varargin = varargin;
-inputs.turnOn = {'no_gap'};
+inputs.turnOn = {'no_gap','allchs'};
 inputs.defaults = struct(...
     'fig_name','matEPOC event marker plot',...
     'Hertz',128,...
@@ -15,7 +19,30 @@ inputs.defaults.visible = {'Ch1','changes','conditions','use'}; % display channe
 
 data.tmp = setGetInputsStruct(inputs);
 
-data.tmp.data = in_data;
+if ~isstruct(in_data)
+    data.tmp.data = in_data;
+elseif isstruct(in_data)
+    mep = in_data;
+     data.tmp.data = mep.matrix(:,mep.EEG_channel_indices);
+        data.tmp.channel_labels = mep.EEG_channels;
+        data.tmp.visible = mep.EEG_channels;
+    
+        if data.tmp.allchs
+            switch questdlg(sprintf('Are you sure you want all %i channels? This will take a while...',numel(mep.channel_labels)),...
+                    'Really...','Yes','No','No')
+                case 'Yes'
+                    data.tmp.data = mep.matrix;
+                    data.tmp.channel_labels = mep.channel_labels;
+                otherwise
+            end
+        end
+    data.tmp.channel_colours = colormap;
+    while size(data.tmp.channel_colours,1) < size(data.tmp.channel_labels)
+        data.tmp.channel_colours = vertcat(data.tmp.channel_colours,data.tmp.channel_colours);
+    end
+    in_data = data.tmp.data;
+end
+    
 
 % make sure the first channel/column is the upward going trigger
 if max(data.tmp.data(:,1)) < max(data.tmp.data(:,2))
