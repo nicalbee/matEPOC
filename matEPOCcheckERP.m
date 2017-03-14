@@ -31,17 +31,25 @@ try
     mep.fig.xdata  = mep.fig.xdata*(1000/mep.tmp.Hertz);
     
     mep.tmp.data = [];
+    mep.tmp.remove = [];
     for i = 1 : mep.n_events;
         % select a period of data surrounding the trigger to determine when the
         % onset actually is
         mep.tmp.filt_points = mep.event_samples(i) + mep.epoch_samples;
+        if mep.tmp.filt_points(1) > 1 && mep.tmp.filt_points(1) < size(mep.data,1)
         mep.tmp.data(:,:,i) = mep.data(mep.tmp.filt_points(1):mep.tmp.filt_points(2),1:2);
-        
+        else
+            % remove epoch
+            mep.tmp.remove(end+1) = i;
+        end
 %         plot(mep.tmp.data(:,1,i),'b');
 %         plot(mep.tmp.data(:,2,i),'r');
 %         if i == 1; hold; end
     end
-    
+    if ~isempty(mep.tmp.remove)
+        mep.tmp.data(:,:,mep.tmp.remove) = [];
+        fprintf('!!! Epochs (n = %i) removed due to missing data\n',numel(mep.tmp.remove)); 
+    end
     % previous (evn scripts pre Aug-2015) adjustments - looking for 'M' & 'W' shapes
     % pre.pos_pre_trig = floor(mean(pre.pre_trig)); % okay but late ~20 msec
     % pre.pos_mid_shape = floor(mean(pre.mid_shape)); % most similar to neuroscan

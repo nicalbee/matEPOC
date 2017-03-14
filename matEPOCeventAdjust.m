@@ -1,4 +1,9 @@
 function out_events = matEPOCeventAdjust(in_data,varargin)
+% updates:
+% 14-Mar-2017 NAB added provision for very early and very late event
+% markers such that extra data is created to fullfill the epoch for
+% tracking under these circumstances. It won't work well because some of
+% the signal is missing...
 try
     inputs.turnOn = {'plot','plot_all'};
     inputs.varargin = varargin;
@@ -42,7 +47,17 @@ try
         % select a period of data surrounding the trigger to determine when the
         % onset actually is
         mep.tmp.filt_points = mep.event_samples(i) + [-1 1] * mep.x_range;
-        mep.tmp.data(:,:,i) = mep.data(mep.tmp.filt_points(1):mep.tmp.filt_points(2),1:2);
+        if mep.tmp.filt_points(1) < 1
+            % not enough data at the start
+            % + 1 for the zero point
+            mep.tmp.fill = [zeros(abs(mep.tmp.filt_points(1))+1,2);mep.data(1:mep.tmp.filt_points(2),1:2)];
+        elseif mep.tmp.filt_points(2) > size(mep.data,1)
+            % not enough data at the end
+            mep.tmp.fill = [mep.data(mep.tmp.filt_points(1):end,1:2); ...
+                zeros(diff([size(mep.data,1),mep.tmp.filt_points(2)]),2)];
+        else
+            mep.tmp.data(:,:,i) = mep.data(mep.tmp.filt_points(1):mep.tmp.filt_points(2),1:2);
+        end
         
 %         plot(mep.tmp.data(:,1,i),'b');
 %         plot(mep.tmp.data(:,2,i),'r');
@@ -150,7 +165,10 @@ try
     % make the samples earlier
     out_events = zeros(size(out_events));
     if isfield(mep.tmp,'mid') && ~isempty(mep.tmp.mid)
-        out_events(out_samples + (-mep.x_range+mep.tmp.mid) - mep.tmp.delay_samples) = out_values;
+        mep.tmp.sample_adjustment = out_samples + (-mep.x_range+mep.tmp.mid) - mep.tmp.delay_samples;
+        mep.tmp.sample_adjustment(mep.tmp.sample_adjustment < 1) = 1;
+        mep.tmp.sample_adjustment(mep.tmp.sample_adjustment > size(out_events,1)) = size(out_events,1);
+        out_events(mep.tmp.sample_adjustment) = out_values;
     else
         fprintf('Serious issue finding event markers: couldn''t identify the pulses\n');
     end
