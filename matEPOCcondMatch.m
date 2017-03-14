@@ -1,4 +1,6 @@
 function markers = matEPOCcondMatch(varargin)
+% updates:
+% 14-Mar-2017 NAB fixed up the alphabetical ordering
 global plot_data
 try
     inputs.varargin = varargin;
@@ -9,6 +11,7 @@ try
         'markers',[],...
         'changes',[],...
         'conditions',[],...
+        'cond_names',[],...
         'sort_by','alphabet',... 'number_events',...
         'file_name',[],...
         'times',[], ...
@@ -38,25 +41,57 @@ try
         
         if ~isnumeric(condition_codes)
             fprintf('Condition variable is non-numeric, needs to be for .mat file\n');
+             if ~isempty(mep.tmp.cond_names)
+                condition_codes = mep.tmp.cond_names;
+             end
             condition_count = zeros(1,numel(condition_codes));
             condition_first_letters = repmat('a',1,numel(condition_codes));
+            
+            % reorder by most common: set this to lowest number (ie 1 for
+            % standard, 2 for deviant in the auditory oddball paradigm)
+            switch mep.tmp.sort_by
+%                 case 'number_events'
+%                     
+%                     [condition_numbers,cond_order] = sort(condition_count,'descend');
+                case 'alphabet'
+%                     [condition_numbers,cond_order] = sort(condition_first_letters,'ascend');
+                    [condition_codes,cond_order] = sort(condition_codes);
+                    % what if they're the same?
+%                     cond_letter_match = zeros(1,numel(condition_first_letters));
+%                     for i = 1 : numel(condition_first_letters)
+%                         for j = 1 : numel(condition_first_letters)
+%                         if strcmp(condition_first_letters(i),condition_first_letters(j))
+%                             cond_letter_match(i) = 1;
+%                         end
+%                         end
+%                     end
+%                     if sum(cond_letter_match)
+%                         % matching so need to try a little harder of
+%                         % sorting alphabetically
+%                         
+%                     end
+            end
+            
             for i = 1 : numel(condition_codes)
                 condition_first_letters(i) = condition_codes{i}(1);
                 condition_count(i) = sum(ismember(mep.tmp.conditions,condition_codes{i}));
             end
-            % reorder by most common: set this to lowest number (ie 1 for
-            % standard, 2 for deviant in the auditory oddball paradigm)
             switch mep.tmp.sort_by
                 case 'number_events'
-                    [condition_numbers,cond_order] = sort(condition_count,'descend');
-                case 'alphabet'
-                    [condition_numbers,cond_order] = sort(condition_first_letters,'ascend');
+                    
+                    [~,cond_order] = sort(condition_count,'descend');
+                    condition_codes = condition_codes(cond_order);
+                    condition_count = condition_count(cond_order);
             end
+            
             mep.tmp.conditions_string = mep.tmp.conditions;
             mep.tmp.conditions_numeric = zeros(size(mep.tmp.conditions));
             for i = 1 : numel(condition_codes)
-                fprintf('''%s'' condition code set to: %i (n = %i)\n',condition_codes{cond_order(i)},i,condition_numbers(i));
-                mep.tmp.conditions_numeric(ismember(mep.tmp.conditions_string,condition_codes{cond_order(i)})) = i;
+                % reordering now done above
+                fprintf('''%s'' condition code set to: %i (n = %i)\n',condition_codes{i},i,condition_count(i));
+                mep.tmp.conditions_numeric(ismember(mep.tmp.conditions_string,condition_codes{i})) = i;
+%                 fprintf('''%s'' condition code set to: %i (n = %i)\n',condition_codes{cond_order(i)},i,condition_count(i));
+%                 mep.tmp.conditions_numeric(ismember(mep.tmp.conditions_string,condition_codes{cond_order(i)})) = i;
             end
         else
             if iscell(mep.tmp.conditions) && isnumeric(mep.tmp.conditions{1})

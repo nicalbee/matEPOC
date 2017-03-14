@@ -14,7 +14,6 @@ else
     time_headers = {'Time','time1'};
 end
 
-
 out = [];
 if ~exist('pres_file','var') || isempty(pres_file)
     [file_name_only,file_dir] = uigetfile('*.*');
