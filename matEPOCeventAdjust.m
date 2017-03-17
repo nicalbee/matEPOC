@@ -4,12 +4,15 @@ function out_events = matEPOCeventAdjust(in_data,varargin)
 % markers such that extra data is created to fullfill the epoch for
 % tracking under these circumstances. It won't work well because some of
 % the signal is missing...
+% 17-Mar-2017 NAB looks like no adjustment might be best - or 'zero'
+% adjustment
 try
     inputs.turnOn = {'plot','plot_all'};
     inputs.varargin = varargin;
     inputs.defaults = struct(...
         'fig_name','matEPOC event onset plot',...
         'plot_range',[-200 200],...
+        'type','zero', ...'onset','apart','mid',...
         'Hertz',128,...
         'delay',20 ... % delay in ms due to transmission
         );
@@ -108,8 +111,9 @@ try
     
     % adjust by samples when the separation between the triggers is larger,
     % scaling (e.g., > 200, >150) may be useful
-    mep.tmp.points = {'onset','apart','mid'};
-    mep.tmp.point_colours = {'c','r','k'};
+    mep.tmp.points = {'onset','apart','mid','zero'};
+    mep.tmp.zero = mep.x_range;
+    mep.tmp.point_colours = {'c','r','k','y'};
     for i = 1 : numel(mep.tmp.points)
         if isfield(mep.tmp,mep.tmp.points{i})
         mep.tmp.([mep.tmp.points{i},'s']) = ones(mep.n_events,1)*mep.tmp.(mep.tmp.points{i});
@@ -159,13 +163,19 @@ try
     end
     
     %% >  adjust for onset and transmission delay
-    mep.tmp.delay_samples = ceil((mep.tmp.delay/1000)/(1/mep.tmp.Hertz));
+    mep.tmp.delay_samples = round((mep.tmp.delay/1000)/(1/mep.tmp.Hertz));
     out_samples = find(out_events,sum(out_events ~= 0),'first');
     out_values = out_events(out_samples);
     % make the samples earlier
     out_events = zeros(size(out_events));
-    if isfield(mep.tmp,'mid') && ~isempty(mep.tmp.mid)
-        mep.tmp.sample_adjustment = out_samples + (-mep.x_range+mep.tmp.mid) - mep.tmp.delay_samples;
+%     if isfield(mep.tmp,'mid') && ~isempty(mep.tmp.mid)
+%         mep.tmp.sample_adjustment = out_samples + (-mep.x_range+mep.tmp.mid) - mep.tmp.delay_samples;
+%         mep.tmp.sample_adjustment(mep.tmp.sample_adjustment < 1) = 1;
+%         mep.tmp.sample_adjustment(mep.tmp.sample_adjustment > size(out_events,1)) = size(out_events,1);
+%         out_events(mep.tmp.sample_adjustment) = out_values;
+        
+    if isfield(mep.tmp,mep.tmp.type) && ~isempty(mep.tmp.(mep.tmp.type))
+        mep.tmp.sample_adjustment = out_samples + (-mep.x_range+mep.tmp.(mep.tmp.type)) - mep.tmp.delay_samples;
         mep.tmp.sample_adjustment(mep.tmp.sample_adjustment < 1) = 1;
         mep.tmp.sample_adjustment(mep.tmp.sample_adjustment > size(out_events,1)) = size(out_events,1);
         out_events(mep.tmp.sample_adjustment) = out_values;
