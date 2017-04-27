@@ -7,7 +7,11 @@ in.file_name = 'evnka101_1passive-evnka101_1passive-22.06.13.13.01.06.edf';
 in.fullfile = fullfile(in.dir,in.file_name);
 in.Hertz = 128;
 
-mep = edf2mat(in.fullfile,in.Hertz);
+in.remove_constant = 1;
+% whether or not channel median is removed from each channel to correct for
+% TestBench units - aroudn 4000 or so.
+
+mep = edf2mat(in.fullfile,in.Hertz,in.remove_constant);
 
 mep = matEPOCsampleRate(mep);
 

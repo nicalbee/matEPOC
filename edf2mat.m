@@ -2,7 +2,7 @@
 %
 % use:
 %
-% [data_matrix,data.channel_labels,data_table] = edf2mat(file_name,data_Hertz)
+% [data_matrix,data.channel_labels,data_table] = edf2mat(file_name,data_Hertz,remove_constant)
 %
 % where:
 %
@@ -12,6 +12,10 @@
 %   full path to file name
 %
 % data_Hertz = sampling rate of the data recording: EPOC = 128, EPOC+ = 256
+%
+% remove_constant = 1 or 0 to switch between removing the median of each
+%   channel from itself. Correcting for overall units of measurement - 4000
+%   or so directly from TestBench. Default = 1.
 %
 % OUTPUT: structured variable
 %
@@ -26,8 +30,9 @@
 %
 % updates:
 % 18-May-2016: NAB auto get file if there isn't an input
+% 27-Apr-2017: NAB added 'remove_constant' option as input
 
-function data = edf2mat(file_name,data_Hertz)
+function data = edf2mat(file_name,data_Hertz,remove_constant)
 
 data.matrix = [];
 data.channel_labels = [];
@@ -58,6 +63,9 @@ default_on = 0;
 if ~exist('data_Hertz','var') || isempty(data_Hertz)
     default_on = 1;
     data_Hertz  = 128; % 1 second of data == record size
+end
+if ~exist('remove_constant','var') || isempty(remove_constant)
+    remove_constant = 1;
 end
 data.Hertz = data_Hertz; % put it in the structure
 %% report what's happening:
@@ -98,7 +106,9 @@ end
 % changed to median as had some poor results 12-Sep-2015 NAB
 % data.matrix(:,data.EEG_channel_indices) = bsxfun(@minus,median(data.matrix(:,data.EEG_channel_indices)),data.matrix(:,data.EEG_channel_indices));
 % data.matrix(:,data.EEG_channel_indices) = bsxfun(@minus,data.matrix(:,data.EEG_channel_indices),median(data.matrix(:,data.EEG_channel_indices)));
-data.matrix = bsxfun(@minus,data.matrix,median(data.matrix));
+if remove_constant
+    data.matrix = bsxfun(@minus,data.matrix,median(data.matrix));
+end
 %% convert to table
 if exist('array2table','file')
     fprintf('\nCreating table array:\t');
