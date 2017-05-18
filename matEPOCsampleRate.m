@@ -22,8 +22,11 @@ if isstruct(mep) && isfield(mep,'table') && istable(mep.table)
     % samples in the file - just divide the ms by 1000 and add on to
     % seconds. Go for a long file (20 minutes or more) to get the best
     % accuracy.
-    if isfield(mep.table,'TIME_STAMP_ms')
+    if sum(ismember(mep.table.Properties.VariableNames,'TIME_STAMP_ms'))
         tmp.data_ms = mep.table.TIME_STAMP_ms/1000 + mep.table.TIME_STAMP_s;
+        if (tmp.data_ms(1) < 0)
+            tmp.data_ms = tmp.data_ms+abs(tmp.data_ms(1));
+        end
         
         mep.Hertz = numel(tmp.data_ms) / (max(tmp.data_ms) - min(tmp.data_ms));
         

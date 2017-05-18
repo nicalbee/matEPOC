@@ -71,7 +71,7 @@ try
         fprintf('Press a key to continue...\n');
         pause
         %         uiwait(h);
-        close(h);
+        try close(h); end
     end
     %     if mep.tmp.plot_all
     %         h = figure('name',mep.tmp.fig_name);
