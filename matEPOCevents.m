@@ -1,6 +1,8 @@
 function [mep,okay] = matEPOCevents(in_data,varargin) % event_channels,event_threshold,pulse_length)
 global plot_data
-
+% updates:
+% 31-Oct-2017 adjusted the mep.tmp.n_use variable (around line 274). It
+%   seemed to be counting the wrong thing: NAB
 try
     fprintf('Running %s:\n',mfilename);
     okay = 1;
@@ -267,8 +269,10 @@ try
             mep.tmp.pulse_use(mep.tmp.pulse_samples(logical(mep.tmp.use))) = mep.tmp.use(find(mep.tmp.use,sum(logical(mep.tmp.use)),'first'));
             %             end
             mep.tmp.n = sum(mep.tmp.pulse);
-            mep.tmp.n_use = sum(mep.tmp.pulse_use);
+%             mep.tmp.n_use = sum(mep.tmp.pulse_use); % 31-Oct-2017 NAB -
+%             doesn't work in the loop below...
             mep.tmp.p = find(mep.tmp.pulse_use);
+            mep.tmp.n_use = numel(mep.tmp.p);
             
             % I think the code to this point does a good job at picking up
             % the start of the events - now really just need to determine
@@ -320,6 +324,7 @@ try
 %                         n = n+1;
 %                     end
                 end
+               mep.tmp.marker_width = marker_width;
                 % looping through all the points
 %                 for i = 1:length(x)
 %                     if (found_marker == 0) && (x(i) > (baseline+threshold(1)))
@@ -377,6 +382,15 @@ try
                 mep.tmp.event_threshold,mep.tmp.pulse_length,mep.tmp.pulse_separation);
             fprintf('\t%i changes found\n',sum(mep.changes ~= 0));
             fprintf('\t%i event markers placed\n\n',sum(mep.markers ~= 0));
+            mep.tmp.marker_count = zeros(numel(mep.tmp.pulse_length),2);
+            if numel(unique(mep.markers)) > 1
+                for i = 1 : numel(mep.tmp.pulse_length)
+                    mep.tmp.marker_count(i,:) = [mep.tmp.pulse_length(i) sum(mep.markers == i)];
+                    fprintf('\t\t%i @ %i milliseconds in length\n',...
+                        mep.tmp.marker_count(i,2),...
+                        mep.tmp.pulse_length(i));
+                end
+            end
         else
             
             okay = 0;

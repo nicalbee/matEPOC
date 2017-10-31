@@ -1,6 +1,12 @@
 function markers = matEPOCcondMatch(varargin)
 % updates:
 % 14-Mar-2017 NAB fixed up the alphabetical ordering
+% 31-Oct-2017 NAB added check for cell array for times
+% 31-Oct-2017 NAB added a time check if time_units aren't set - assume that
+%   if the difference is less than 100, the units are in seconds...
+% 31-Oct-2017 NAB passed Hertz into the matEPOCplot function
+% 31-Oct-2017 NAB added warning about mismatch of external condition
+%   numbers to 'use' channel
 global plot_data
 try
     inputs.varargin = varargin;
@@ -15,7 +21,7 @@ try
         'sort_by','alphabet',... 'number_events',...
         'file_name',[],...
         'times',[], ...
-        'time_units','ms',... 'sec'
+        'time_units','ms',... 'sec','msec'
         'ylim',[-20 200],...
         'Hertz',128 ...
         );
@@ -137,7 +143,13 @@ try
         
         sampleSummary(mep.tmp.markers_samples*(1/mep.tmp.Hertz),'EPOC markers');
         
-        if ~isempty(mep.tmp.times) && isnumeric(mep.tmp.times)
+        % 31-Oct-2017 NAB added check for cell array
+        if ~isempty(mep.tmp.times) && iscell(mep.tmp.times)
+            mep.tmp.times = str2double(mep.tmp.times);
+            fprintf('Converted times from cell to numeric array\n');
+        end
+        
+        if ~isempty(mep.tmp.times) && isnumeric(mep.tmp.times) %|| iscell(mep.tmp.times)
             mep.okay.times = 1;
             % match up for first marker and go from there
             % - assuming that the numbers are in milliseconds of some kind -
@@ -148,6 +160,18 @@ try
             mep.tmp.first_marker_sec = mep.tmp.first_marker_sample*mep.tmp.sample_duration;
             
             mep.tmp.times_adjust = mep.tmp.first_marker_sec + (mep.tmp.times - mep.tmp.times(1));
+            if ~sum(ismember(mep.tmp.setGet.foundList,'time_units'))
+                % units not set, try to see what they are % 31-Oct-2017 NAB
+                mep.tmp.time_diff = diff(mep.tmp.times);
+                mep.tmp.time_diff_mean = mean(mep.tmp.time_diff);
+                if mep.tmp.time_diff_mean < 100
+                    fprintf(['Mean time difference < 100 (M = %3.2f), ',...
+                        'and the ''time_units'' variable wasn''t set. ',...
+                        'Assuming the units should be in seconds: adjusting\n\n'],...
+                        mep.tmp.time_diff_mean);
+                    mep.tmp.time_units = 'sec';
+                end
+            end
             switch mep.tmp.time_units
                 case {'ms','msec'}
                     mep.tmp.times_adjust = mep.tmp.first_marker_sec + mep.tmp.times_adjust/1000;
@@ -159,7 +183,7 @@ try
             
             fprintf(['\nAdded %i events from timing data (n = %i events)\n',...
                 '- please note, did this by matching to the first EPOC marker.\n',...
-                '  If this frist marker wasn''t recorded in the EEG, these ',...
+                '  If this first marker wasn''t recorded in the EEG, these ',...
                 'won''t line up\n',...
                 '- also, assumed millisecond timing of event times and this\n',...
                 '  has been converted to samples with %i Hertz sampling.\n',...
@@ -205,10 +229,17 @@ try
             end
         end
         if mep.okay.conditions && numel(unique(mep.tmp.conditions_numeric)) > 1
+            mep.tmp.align_match = 'same number, therefore okay to align.';
+            if numel(mep.tmp.conditions_numeric) ~= sum(mep.tmp.markers)
+                mep.tmp.align_match = 'there''s a mismatch, alignment not recommended until/unless the numbers are the same.';
+            end
             mep.tmp.align_question = sprintf(...
-                'Align n = %i external conditions with n = %i in ''use'' channel?',...
+                ['Align n = %i external conditions with n = %i in ''use'' channel?',...
+                '\n\nNote: there are %i external events and %i found in ''use'' channel: %s'],...
                 numel(unique(mep.tmp.conditions_numeric)),...
-                numel(mep.tmp.markers(unique(mep.tmp.markers ~= 0))));
+                numel(mep.tmp.markers(unique(mep.tmp.markers ~= 0))),...
+                numel(mep.tmp.conditions_numeric),...
+                sum(mep.tmp.markers),mep.tmp.align_match);
             if mep.tmp.run > 1
                 mep.tmp.align_question = strrep(mep.tmp.align_question,'Align','Re-align');
             end
@@ -243,7 +274,7 @@ try
                 matEPOCplot(mep.tmp.data,...
                     'channel_labels',mep.tmp.data_labels,...
                     'fig_name',['matEPOC Condition Matching: ',mep.tmp.file_name],...'visible',{'conditions','use'},...
-                    'ylim',mep.tmp.ylim);
+                    'ylim',mep.tmp.ylim,'Hertz',mep.tmp.Hertz);
                 if exist('plot_data','var') && isfield(plot_data,'tmp') && isfield(plot_data.tmp,'data')
                     if size(plot_data.tmp.data,1) > mep.tmp.data_rows
                         fprintf('Conditions or samples have increased the matrix size: resetting\n');
