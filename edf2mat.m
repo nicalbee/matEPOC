@@ -71,7 +71,7 @@ data.Hertz = data_Hertz; % put it in the structure
 %% report what's happening:
 fprintf('Running: %s\n',mfilename)
 fprintf('\nImporting: %s\n',file_name)
-fprintf('\tRecorded at %i Hertz (default = %i)',data_Hertz,default_on);
+fprintf('\tRecorded at %3.2f Hertz (default = %3.2f)',data_Hertz,default_on);
 fprintf('\nThis will take a little while:\n\t');
 
 %% Initialise EDF file_stream object

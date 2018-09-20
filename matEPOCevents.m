@@ -357,13 +357,23 @@ try
             mep.tmp.data = [mep.event_channels,mep.tmp.marker_diff,mep.tmp.pulse*100,mep.tmp.pulse_use];
             mep.tmp.data_labels = {'Ch1','Ch2','difference','changes','use'};
             
+%             event_samples = find(mep.tmp.pulse_use)*(1/mep.tmp.Hertz)*.5;
+%             fprintf('Sample summary for %s\n','pulse_use');
+%             fprintf('\tn = %i\n',numel(event_samples));
+%             event_diff = diff(event_samples);
+%             fprintf(['\tmean difference = %3.2f (SD = %3.2f, ',...
+%                 'min = %3.2f, max = %3.2f)\n'],...
+%                 mean(event_diff),std(event_diff),...
+%                 min(event_diff),max(event_diff));
+
+            
             mep.tmp.fig_name = 'event plot';
             if isfield(mep,'filename')
                 mep.tmp.fig_name = mep.filename;
             end
             if mep.tmp.plot
                 matEPOCplot(mep.tmp.data,'channel_labels',mep.tmp.data_labels,...
-                    'fig_name',mep.tmp.fig_name);
+                    'fig_name',mep.tmp.fig_name,'Hertz',mep.tmp.Hertz);
                 % check for any adjustments made
                 if exist('plot_data','var') && isfield(plot_data,'tmp') && isfield(plot_data.tmp,'data')
                     mep.tmp.pulse_use = plot_data.tmp.data(:,ismember(mep.tmp.data_labels,'use'));

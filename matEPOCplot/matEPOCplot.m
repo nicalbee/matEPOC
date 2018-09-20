@@ -148,7 +148,7 @@ for i = 1 : size(in_data,2)
                 'Tag',data.tmp.channel_labels{i},...
                 'DisplayName',data.tmp.channel_labels{i});
     end
-    if ~sum(strcmpi(data.tmp.visible,data.tmp.name));
+    if ~sum(strcmpi(data.tmp.visible,data.tmp.name))
         set(data.tmp.(data.tmp.name).h,'Visible','off');
     end
     
