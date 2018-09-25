@@ -1,6 +1,7 @@
 function [xdata,ydata_use] = matEPOCsamples2patch(ydata,varargin)
 
 inputs.turnOn = {'update'};
+inputs.defaults = struct('offset',[]);
 inputs.varargin = varargin;
 % inputs.defaults = struct(...
 %     'channels','use' ...
@@ -18,6 +19,31 @@ else
         if isempty(ydata_use) && sum(ismember(data.tmp.channel_labels,mep.channels{i}))
             
             ydata_use = data.tmp.data(:,ismember(data.tmp.channel_labels,mep.channels{i}));
+        end
+        % offset the conditions
+        if ~isempty(mep.offset) && strcmp('conditions',mep.channels{i})
+            switch mep.offset
+                case {'shiftOffsetLeft','resetOffset','shiftOffsetRight'}
+                    if ~isfield(data.tmp,'offset')
+                        data.tmp.offset = 0;
+%                         data.tmp.offset_original = ydata_use;
+                        set(gcf,'UserData',data);
+                    end
+                    switch mep.offset
+                        case 'shiftOffsetLeft'
+                            data.tmp.offset = data.tmp.offset - 5;
+                            ydata_use = [ydata_use(abs(data.tmp.offset)+1:end); zeros(abs(data.tmp.offset),1)];
+                        case 'resetOffset'
+                            data.tmp.offset = 0;
+                            ydata_use = data.offset_original;
+                        case 'shiftOffsetRight'
+                            data.tmp.offset = data.tmp.offset + 5;
+                            ydata_use = [zeros(data.tmp.offset,1); ydata_use(1:(end-data.tmp.offset))];
+                            
+                    end
+                    data.tmp.data(:,ismember(data.tmp.channel_labels,mep.channels{i})) = ydata_use;
+                    set(gcf,'UserData',data);
+            end
         end
         % sample_times = get(ch(end),'XData'); % doesn't work if it's a patch
         event_samples = find(ydata_use ~= 0);

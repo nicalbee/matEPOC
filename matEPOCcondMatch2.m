@@ -1,4 +1,4 @@
-function markers = matEPOCcondMatch(varargin)
+function markers = matEPOCcondMatch2(varargin)
 % updates:
 % 14-Mar-2017 NAB fixed up the alphabetical ordering
 % 31-Oct-2017 NAB added check for cell array for times

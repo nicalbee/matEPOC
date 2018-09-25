@@ -164,3 +164,40 @@ if ~yoff
         end
     end
 end
+%% offset adjust
+if isfield(data.tmp,'offset') && data.tmp.offset
+    fprintf('Creating offset adjustment:\n');
+    fig.obut.size = [.045 .075]; % used for y as well
+    fig.obut.pos.x = [.8 .85 .9]; %[.15 .25 .75 .85];
+    
+    fig.obut.pos.y = ones(1,numel(fig.obut.pos.x))*((fig.axes.pos(2)+.1)-fig.obut.size(2)-.175);
+    % fig.obut.pos(1,:) = [fig.axes.pos(1)-fig.obut.size(1)*.5 fig.axes.pos(2)-fig.axes.pos(2)*.5];
+    % fig.obut.pos(2,:) = [sum(fig.axes.position([1 3]))-fig.obut.size(1)*.5 fig.obut.pos(1,2)];
+    
+    fig.obut.text = {'left','reset','right'};
+    fig.obut.tags = {'shiftOffsetLeft','resetOffset','shiftOffsetRight'};
+    fig.obut.tips = {...
+        'Click to offset ''conditions'' channel to the left',...
+        'Click to reset the ''conditions'' channel to original position',...
+         'Click to offset ''conditions'' channel to the right'};
+    if ~isempty(varargin) && sum(strcmp(varargin,'epoch'))
+        fig.obut.pos.x(2:3) = [];
+        tmp = {'text','tags','tips'};
+        for i = 1 : numel(tmp)
+            fig.obut.(tmp{i})([1 4]) = [];
+        end
+    end
+    for i = 1 : numel(fig.obut.pos.x)
+        fig.obut.position(i,:) = [fig.obut.pos.x(i)-fig.obut.size(1)*.5 fig.obut.pos.y(i) fig.obut.size];
+        fig.obut.h(i) = uicontrol('parent',fig.h,'units','normalized',...
+            'style','pushbutton',...
+            'string',fig.obut.text{i},...
+            'tag',fig.obut.tags{i},...
+            'CallBack',@matEPOCplotAxesAdjust,...@matEPOCplotXadjust,...
+            'ToolTipString',fig.obut.tips{i},...
+            'position',fig.obut.position(i,:));
+        if ~isempty(varargin) && sum(strcmp(varargin,'epoch'))
+            set(fig.obut.h(i),'CallBack', @matEPOCplotEpochAxesAdjust);
+        end
+    end
+end

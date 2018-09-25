@@ -118,7 +118,15 @@ switch get(handle,'tag')
         ylim = round([ylim(1) + diff(ylim)*.25 ylim(2) - diff(ylim)*.25]);
     case 'zoomout'
         ylim = round([ylim(1) - diff(ylim) ylim(2) + diff(ylim)]);
-        
+%     case {'shiftOffsetLeft','resetOffset','shiftOffsetRight'}
+%         ax_ch = get(axes_h,'children');
+%         
+%         switch get(handle,'tag')
+%             case 'shiftOffsetLeft'
+%                 
+%             case 'resetOffset'
+%             case 'shiftOffsetRight'
+%         end
 end
 
 if xlim(1) < (1/mep.tmp.Hertz)
@@ -186,7 +194,7 @@ legend_ch = get(legend_h,'children');
 matEPOCplotTrialText('delete');
 set(axes_h,'Xlim',xlim,'Ylim',ylim);
 
-matEPOCsamples2patch([],'update');
+matEPOCsamples2patch([],'update','offset',get(handle,'tag'));
 matEPOCplotTrialText('draw');
 
 set(lower_xh,'string',xdata(1));
@@ -194,26 +202,26 @@ set(upper_xh,'string',xdata(2));
 set(lower_yh,'string',ylim(1));
 set(upper_yh,'string',ylim(2));
 
-% patches
-tmp_labels = {'epoch','baseline','poi'};
-%         tmp_vis = cell(1,numel(tmp_labels));%size(mep.tmp.data,2));
-        check_h = zeros(1,numel(tmp_labels));%size(mep.tmp.data,2));
-        for i = 1 : numel(tmp_labels); % numel(mep.data.epoch_labels)
-            if sum(strcmpi(get(legend_ch,'Tag'),[tmp_labels{i},'_check']))
-            check_h(i) = legend_ch(strcmpi(get(legend_ch,'Tag'),[tmp_labels{i},'_check']));%mep.data.epoch_labels{i}));
-            if ~isempty(check_h(i)) && check_h(i) && strcmp(get(get(check_h(i),'UserData'),'Type'),'patch')
-                switch tmp_labels{i}
-                    case {'epoch','baseline','poi'}
-                        ydata = ones(4,size(get(get(check_h(i),'UserData'),'YData'),2));
-                         ydata = bsxfun(@times,ydata,[ones(1,2)*max(ylim) ones(1,2)*min(ylim)]');
-                        set(get(check_h(i),'UserData'),'YData', ydata);
-%                     case 'peak'
-%                         set(get(check_h(i),'UserData'),'YData', ylim);
-                end
-            end
-%             if iscell(tmp_vis{i})
-%                 tmp_vis{i} = tmp_vis{i}{1};
+% % patches
+% tmp_labels = {'epoch','baseline','poi'};
+% %         tmp_vis = cell(1,numel(tmp_labels));%size(mep.tmp.data,2));
+%         check_h = zeros(1,numel(tmp_labels));%size(mep.tmp.data,2));
+%         for i = 1 : numel(tmp_labels) % numel(mep.data.epoch_labels)
+%             if sum(strcmpi(get(legend_ch,'Tag'),[tmp_labels{i},'_check']))
+%             check_h(i) = legend_ch(strcmpi(get(legend_ch,'Tag'),[tmp_labels{i},'_check']));%mep.data.epoch_labels{i}));
+%             if ~isempty(check_h(i)) && check_h(i) && strcmp(get(get(check_h(i),'UserData'),'Type'),'patch')
+%                 switch tmp_labels{i}
+%                     case {'epoch','baseline','poi'}
+%                         ydata = ones(4,size(get(get(check_h(i),'UserData'),'YData'),2));
+%                          ydata = bsxfun(@times,ydata,[ones(1,2)*max(ylim) ones(1,2)*min(ylim)]');
+%                         set(get(check_h(i),'UserData'),'YData', ydata);
+% %                     case 'peak'
+% %                         set(get(check_h(i),'UserData'),'YData', ylim);
+%                 end
 %             end
-            end
-        end
+% %             if iscell(tmp_vis{i})
+% %                 tmp_vis{i} = tmp_vis{i}{1};
+% %             end
+%             end
+%         end
 % end
