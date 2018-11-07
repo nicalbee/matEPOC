@@ -142,7 +142,7 @@ end
 % data.matrix(:,data.EEG_channel_indices) = bsxfun(@minus,median(data.matrix(:,data.EEG_channel_indices)),data.matrix(:,data.EEG_channel_indices));
 % data.matrix(:,data.EEG_channel_indices) = bsxfun(@minus,data.matrix(:,data.EEG_channel_indices),median(data.matrix(:,data.EEG_channel_indices)));
 if remove_constant
-    data.matrix = bsxfun(@minus,data.matrix,median(data.matrix));
+    data.matrix(:,data.EEG_channel_indices) = bsxfun(@minus,data.matrix(:,data.EEG_channel_indices),median(data.matrix(:,data.EEG_channel_indices)));
 end
 %% convert to table
 if exist('array2table','file')
