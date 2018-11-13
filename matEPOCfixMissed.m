@@ -50,7 +50,7 @@ else
     
     fprintf('\t%i disruptions/skips, %i samples missed ~ reflecting %3.2f minutes of data\n',...
         numel(mep.missed.missed),mep.missed.total_missed, mep.missed.total_missed*(1/mep.Hertz)/60);
-    
+    % get the first bit of the table, before the first miss - hopefully
     out.table = mep.table(1:(mep.missed.missed(1)-1),:);
     in.table_as_matrix = table2array(mep.table);
     fprintf('\n\tInterpolating, # skipped rows x columns - takes a while:\n');
